@@ -4,6 +4,8 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
  
 import java.sql.ResultSet;
+import org.owasp.esapi.ESAPI;
+
 //import java.sql.Types;
 
 public class ToJSON {
@@ -14,6 +16,7 @@ public class ToJSON {
 		
 		try {
 			java.sql.ResultSetMetaData rsmd = rs.getMetaData();
+			String temp = null;
 			
 			// loop through rows first
 			while (rs.next()) {
@@ -43,7 +46,13 @@ public class ToJSON {
 					} else if (rsmd.getColumnType(i) == java.sql.Types.NVARCHAR) {
 						obj.put(columnName, rs.getNString(columnName));
 					} else if (rsmd.getColumnType(i) == java.sql.Types.VARCHAR) {
-						obj.put(columnName, rs.getString(columnName));
+						// This code will make sure that VARCHAR2 is in its base state and is not encoded
+						// as would be the case if a script was attempted to be injected.
+						temp = rs.getString(columnName);
+						temp = ESAPI.encoder().canonicalize(temp);
+						temp = ESAPI.encoder().encodeForHTML(temp);
+						obj.put(columnName, temp);
+						//obj.put(columnName, rs.getString(columnName));
 					} else if (rsmd.getColumnType(i) == java.sql.Types.TINYINT) {
 						obj.put(columnName, rs.getInt(columnName));
 					} else if (rsmd.getColumnType(i) == java.sql.Types.SMALLINT) {
