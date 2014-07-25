@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.codehaus.jettison.json.JSONArray;
 
@@ -14,25 +15,15 @@ import com.youtube.util.ToJSON;
 
 @Path("/v1/inventory")
 public class V1_inventory {
-
-	/*@Path("/v1/inventory/*")
-	@GET
-	@Produces(MediaType.TEXT_HTML)
-	public String returnMsg () {
-	    String myString = null;
-		myString = "here";
-	
-		return myString;
-		
-	} */
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public String returnAllInventory() throws Exception {
+	public Response returnAllInventory() throws Exception {
 
 		PreparedStatement query = null;
 		String returnString = null;
 		Connection conn = null;
+		Response rb = null;
 
 		try {
 			conn = Oracle.OracleConn().getConnection();
@@ -45,6 +36,7 @@ public class V1_inventory {
 			json = converter.toJSONArray(rs);
 						
 			returnString = json.toString();
+			rb = Response.ok(returnString).build();
 
 			query.close();
 
@@ -57,6 +49,6 @@ public class V1_inventory {
 				query.close();
 			}
 		}
-		return returnString; 
+		return rb; 
 	}  
 }
